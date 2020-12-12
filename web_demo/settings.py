@@ -37,14 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'helloworld.apps.HelloworldConfig'
+    'helloworld.apps.HelloworldConfig',
+    'users.apps.UsersConfig'
+    
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -55,7 +57,7 @@ ROOT_URLCONF = 'web_demo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -76,8 +78,18 @@ WSGI_APPLICATION = 'web_demo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        # 使用 mysql 数据库
+        'ENGINE': 'django.db.backends.mysql',
+        # 数据库服务的IP，注意改给自己的
+        'HOST': '127.0.0.1',
+        # 数据库服务的端口，mysql服务默认端口为 3306
+        'PORT': 3306,
+        # 链接数据库服务的用户名
+        'USER': 'root',
+        # 链接数据库服务的密码
+        'PASSWORD': '',
+        # 使用的数据库名称
+        'NAME': 'web_db',
     }
 }
 
@@ -119,3 +131,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+CACHES = {
+    # 缓存空间
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        # 缓存空间的地址，此处是对应redis数据库的地址
+        # 注意：这里 192.168.19.131 需要改成自己的 redis 数据库的IP
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# Django框架的 Session 存储配置，此处是设置将 Session 数据存储到缓存中
+# 注意：因为缓存已经设置为了redis，所有自然 session 数据就会存储到 redis 数据库中
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# 此处是设置将 Session 数据存储到 CACHES 缓存的 default 空间中
+SESSION_CACHE_ALIAS = "default"
